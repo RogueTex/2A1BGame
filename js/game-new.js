@@ -4,7 +4,6 @@ class AlphabetGame {
         this.score = 0;
         this.bestScore = localStorage.getItem('alphabet2048-best') || 0;
         this.gameWon = false;
-        this.animating = false;
         
         this.initializeBoard();
         this.bindEvents();
@@ -16,31 +15,6 @@ class AlphabetGame {
 
     initializeBoard() {
         this.board = Array(4).fill().map(() => Array(4).fill(null));
-        this.setupGameBoard();
-    }
-
-    setupGameBoard() {
-        const gameBoard = document.getElementById('game-board');
-        gameBoard.innerHTML = '';
-        
-        // Create grid background
-        const gridContainer = document.createElement('div');
-        gridContainer.className = 'grid-container';
-        
-        for (let row = 0; row < 4; row++) {
-            const gridRow = document.createElement('div');
-            gridRow.className = 'grid-row';
-            
-            for (let col = 0; col < 4; col++) {
-                const gridCell = document.createElement('div');
-                gridCell.className = 'grid-cell';
-                gridRow.appendChild(gridCell);
-            }
-            
-            gridContainer.appendChild(gridRow);
-        }
-        
-        gameBoard.appendChild(gridContainer);
     }
 
     bindEvents() {
@@ -55,8 +29,7 @@ class AlphabetGame {
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             e.preventDefault();
             
-            if (this.animating) return;
-            
+            const previousBoard = JSON.parse(JSON.stringify(this.board));
             let moved = false;
 
             switch(e.key) {
@@ -75,24 +48,16 @@ class AlphabetGame {
             }
 
             if (moved) {
-                this.animating = true;
-                
-                // Update display and render with animation
+                this.addRandomLetter();
+                this.renderBoard();
                 this.updateDisplay();
-                this.renderBoardWithAnimation();
                 
-                setTimeout(() => {
-                    this.addRandomLetter();
-                    this.renderBoardWithAnimation();
-                    this.animating = false;
-                    
-                    if (this.checkWin() && !this.gameWon) {
-                        this.showGameWon();
-                        this.gameWon = true;
-                    } else if (this.checkGameOver()) {
-                        this.showGameOver();
-                    }
-                }, 150);
+                if (this.checkWin() && !this.gameWon) {
+                    this.showGameWon();
+                    this.gameWon = true;
+                } else if (this.checkGameOver()) {
+                    this.showGameOver();
+                }
             }
         }
     }
@@ -181,6 +146,7 @@ class AlphabetGame {
         
         while (i < array.length) {
             if (i < array.length - 1 && array[i] === array[i + 1]) {
+                // Merge identical letters
                 const nextLetter = String.fromCharCode(array[i].charCodeAt(0) + 1);
                 result.push(nextLetter);
                 this.score += this.getLetterValue(nextLetter);
@@ -195,7 +161,7 @@ class AlphabetGame {
     }
 
     getLetterValue(letter) {
-        return Math.pow(2, letter.charCodeAt(0) - 64);
+        return Math.pow(2, letter.charCodeAt(0) - 64); // A=2, B=4, C=8, etc.
     }
 
     addRandomLetter() {
@@ -210,40 +176,28 @@ class AlphabetGame {
 
         if (emptyCells.length > 0) {
             const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            const value = Math.random() < 0.9 ? 'A' : 'B';
-            this.board[randomCell.row][randomCell.col] = value;
+            // 90% chance for 'A', 10% chance for 'B'
+            this.board[randomCell.row][randomCell.col] = Math.random() < 0.9 ? 'A' : 'B';
         }
     }
 
     renderBoard() {
-        this.renderBoardWithAnimation();
-    }
-
-    renderBoardWithAnimation() {
         const gameBoard = document.getElementById('game-board');
-        const existingTiles = gameBoard.querySelectorAll('.tile');
-        existingTiles.forEach(tile => tile.remove());
+        gameBoard.innerHTML = '';
 
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                
                 if (this.board[row][col]) {
-                    const tile = this.createTileElement(row, col, this.board[row][col]);
-                    gameBoard.appendChild(tile);
+                    cell.textContent = this.board[row][col];
+                    cell.classList.add(`letter-${this.board[row][col]}`);
                 }
+                
+                gameBoard.appendChild(cell);
             }
         }
-    }
-
-    createTileElement(row, col, value) {
-        const tile = document.createElement('div');
-        tile.className = `tile letter-${value}`;
-        tile.textContent = value;
-        
-        const x = col * 90;
-        const y = row * 90;
-        tile.style.transform = `translate(${x}px, ${y}px)`;
-        
-        return tile;
     }
 
     updateDisplay() {
@@ -269,6 +223,7 @@ class AlphabetGame {
     }
 
     checkGameOver() {
+        // Check for empty cells
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 if (this.board[row][col] === null) {
@@ -277,14 +232,17 @@ class AlphabetGame {
             }
         }
 
+        // Check for possible merges
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 const current = this.board[row][col];
                 
+                // Check right
                 if (col < 3 && current === this.board[row][col + 1]) {
                     return false;
                 }
                 
+                // Check down
                 if (row < 3 && current === this.board[row + 1][col]) {
                     return false;
                 }
@@ -312,7 +270,6 @@ class AlphabetGame {
         this.board = [];
         this.score = 0;
         this.gameWon = false;
-        this.animating = false;
         
         document.getElementById('game-over').classList.add('hidden');
         document.getElementById('game-won').classList.add('hidden');
@@ -325,6 +282,7 @@ class AlphabetGame {
     }
 }
 
+// Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new AlphabetGame();
 });

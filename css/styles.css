@@ -294,48 +294,23 @@ footer a:hover {
     }
     
     .game-board {
-        grid-template-columns: repeat(4, 60px);
-        grid-template-rows: repeat(4, 60px);
+        width: 310px;
+        height: 310px;
     }
     
-    .cell {
+    .tile {
+        width: 60px;
+        height: 60px;
         font-size: 1.5rem;
+    }
+    
+    .grid-cell {
+        width: 60px;
+        height: 60px;
     }
     
     .game-info {
         flex-direction: column;
         gap: 15px;
     }
-}
-.cell-k { background-color: #ffc0cb; }
-.cell-l { background-color: #ffe4e1; }
-.cell-m { background-color: #fff0f5; }
-.cell-n { background-color: #e6e6fa; }
-.cell-o { background-color: #d8bfd8; }
-.cell-p { background-color: #dda0dd; }
-.cell-q { background-color: #ba55d3; }
-.cell-r { background-color: #9370db; }
-.cell-s { background-color: #8a2be2; }
-.cell-t { background-color: #7b68ee; }
-.cell-u { background-color: #6a5acd; }
-.cell-v { background-color: #483d8b; }
-.cell-w { background-color: #4169e1; }
-.cell-x { background-color: #0000ff; }
-.cell-y { background-color: #0000cd; }
-.cell-z { background-color: #00008b; }
-
-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1em;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #0056b3;
 }
