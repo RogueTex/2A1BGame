@@ -12,6 +12,10 @@ class AlphabetGame {
         this.addRandomLetter();
         this.addRandomLetter();
         this.renderBoard();
+
+        // Recompute tile positions on resize/orientation change to keep alignment
+        window.addEventListener('resize', () => this.renderBoardWithAnimation());
+        window.addEventListener('orientationchange', () => setTimeout(() => this.renderBoardWithAnimation(), 50));
     }
 
     initializeBoard() {
@@ -26,20 +30,13 @@ class AlphabetGame {
         // Create grid background
         const gridContainer = document.createElement('div');
         gridContainer.className = 'grid-container';
-        
-        for (let row = 0; row < 4; row++) {
-            const gridRow = document.createElement('div');
-            gridRow.className = 'grid-row';
-            
-            for (let col = 0; col < 4; col++) {
-                const gridCell = document.createElement('div');
-                gridCell.className = 'grid-cell';
-                gridRow.appendChild(gridCell);
-            }
-            
-            gridContainer.appendChild(gridRow);
+
+        for (let i = 0; i < 16; i++) {
+            const gridCell = document.createElement('div');
+            gridCell.className = 'grid-cell';
+            gridContainer.appendChild(gridCell);
         }
-        
+
         gameBoard.appendChild(gridContainer);
     }
 
@@ -316,11 +313,48 @@ class AlphabetGame {
         const tile = document.createElement('div');
         tile.className = `tile letter-${value}`;
         tile.textContent = value;
-        
-        const x = col * 90;
-        const y = row * 90;
+
+        const board = document.getElementById('game-board');
+        const gridContainer = document.querySelector('.grid-container');
+
+        // Defaults in case DOM metrics aren't ready yet
+        let cellSize = 80;
+        let gap = 10;
+        let offsetX = 18;
+        let offsetY = 18;
+
+        if (gridContainer && board) {
+            const containerStyle = getComputedStyle(gridContainer);
+            const boardStyle = getComputedStyle(document.documentElement);
+
+            const gridRect = gridContainer.getBoundingClientRect();
+            const boardRect = board.getBoundingClientRect();
+
+            const gapValue = containerStyle.getPropertyValue('gap') || containerStyle.getPropertyValue('grid-column-gap');
+            gap = parseFloat(gapValue) || gap;
+
+            cellSize = (gridRect.width - gap * 3) / 4;
+            if (cellSize < 0) cellSize = 0;
+
+            offsetX = gridRect.left - boardRect.left;
+            offsetY = gridRect.top - boardRect.top;
+
+            if (!Number.isFinite(offsetX) || !Number.isFinite(offsetY)) {
+                const padValue = parseFloat(boardStyle.getPropertyValue('--board-padding'));
+                const fallbackPad = Number.isFinite(padValue) ? padValue : 12;
+                offsetX = fallbackPad;
+                offsetY = fallbackPad;
+            }
+        }
+
+        tile.style.width = `${cellSize}px`;
+        tile.style.height = `${cellSize}px`;
+        tile.style.fontSize = `${Math.max(Math.floor(cellSize * 0.5), 14)}px`;
+
+        const x = offsetX + col * (cellSize + gap);
+        const y = offsetY + row * (cellSize + gap);
         tile.style.transform = `translate(${x}px, ${y}px)`;
-        
+
         return tile;
     }
 
