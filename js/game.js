@@ -49,51 +49,129 @@ class AlphabetGame {
         document.getElementById('restart-btn').addEventListener('click', () => this.newGame());
         document.getElementById('continue-btn').addEventListener('click', () => this.hideGameWon());
         document.getElementById('new-game-won-btn').addEventListener('click', () => this.newGame());
+        
+        // Add touch/swipe support for mobile
+        this.addTouchSupport();
+    }
+
+    addTouchSupport() {
+        let startX = null;
+        let startY = null;
+        const gameBoard = document.getElementById('game-board');
+        
+        gameBoard.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+        }, { passive: false });
+        
+        gameBoard.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (startX === null || startY === null) return;
+            
+            const touch = e.changedTouches[0];
+            const endX = touch.clientX;
+            const endY = touch.clientY;
+            
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const minSwipeDistance = 50; // Minimum distance for a swipe
+            
+            // Determine swipe direction
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal swipe
+                if (Math.abs(deltaX) > minSwipeDistance) {
+                    if (deltaX > 0) {
+                        this.handleMove('right');
+                    } else {
+                        this.handleMove('left');
+                    }
+                }
+            } else {
+                // Vertical swipe
+                if (Math.abs(deltaY) > minSwipeDistance) {
+                    if (deltaY > 0) {
+                        this.handleMove('down');
+                    } else {
+                        this.handleMove('up');
+                    }
+                }
+            }
+            
+            startX = null;
+            startY = null;
+        }, { passive: false });
+        
+        // Prevent default touch behaviors that might interfere
+        gameBoard.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    }
+
+    handleMove(direction) {
+        if (this.animating) return;
+        
+        let moved = false;
+
+        switch(direction) {
+            case 'up':
+                moved = this.moveUp();
+                break;
+            case 'down':
+                moved = this.moveDown();
+                break;
+            case 'left':
+                moved = this.moveLeft();
+                break;
+            case 'right':
+                moved = this.moveRight();
+                break;
+        }
+
+        if (moved) {
+            this.animating = true;
+            
+            // Update display and render with animation
+            this.updateDisplay();
+            this.renderBoardWithAnimation();
+            
+            setTimeout(() => {
+                this.addRandomLetter();
+                this.renderBoardWithAnimation();
+                this.animating = false;
+                
+                if (this.checkWin() && !this.gameWon) {
+                    this.showGameWon();
+                    this.gameWon = true;
+                } else if (this.checkGameOver()) {
+                    this.showGameOver();
+                }
+            }, 150);
+        }
     }
 
     handleKeyPress(e) {
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             e.preventDefault();
             
-            if (this.animating) return;
-            
-            let moved = false;
-
+            let direction;
             switch(e.key) {
                 case 'ArrowUp':
-                    moved = this.moveUp();
+                    direction = 'up';
                     break;
                 case 'ArrowDown':
-                    moved = this.moveDown();
+                    direction = 'down';
                     break;
                 case 'ArrowLeft':
-                    moved = this.moveLeft();
+                    direction = 'left';
                     break;
                 case 'ArrowRight':
-                    moved = this.moveRight();
+                    direction = 'right';
                     break;
             }
-
-            if (moved) {
-                this.animating = true;
-                
-                // Update display and render with animation
-                this.updateDisplay();
-                this.renderBoardWithAnimation();
-                
-                setTimeout(() => {
-                    this.addRandomLetter();
-                    this.renderBoardWithAnimation();
-                    this.animating = false;
-                    
-                    if (this.checkWin() && !this.gameWon) {
-                        this.showGameWon();
-                        this.gameWon = true;
-                    } else if (this.checkGameOver()) {
-                        this.showGameOver();
-                    }
-                }, 150);
-            }
+            
+            this.handleMove(direction);
         }
     }
 
