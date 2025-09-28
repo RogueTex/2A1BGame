@@ -89,18 +89,48 @@ header p {
 }
 
 .game-board {
-    display: grid;
-    grid-template-columns: repeat(4, 80px);
-    grid-template-rows: repeat(4, 80px);
-    gap: 10px;
+    position: relative;
+    width: 370px;
+    height: 370px;
     background: rgba(255, 255, 255, 0.2);
     padding: 15px;
     border-radius: 15px;
     backdrop-filter: blur(10px);
 }
 
-.cell {
+.grid-container {
+    position: absolute;
+    z-index: 1;
+    top: 15px;
+    left: 15px;
+}
+
+.grid-row {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.grid-row:last-child {
+    margin-bottom: 0;
+}
+
+.grid-cell {
+    width: 80px;
+    height: 80px;
     background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
+.grid-cell:last-child {
+    margin-right: 0;
+}
+
+.tile {
+    position: absolute;
+    z-index: 2;
+    width: 80px;
+    height: 80px;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -108,35 +138,68 @@ header p {
     font-size: 2rem;
     font-weight: bold;
     color: white;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.15s ease-in-out;
+    top: 15px;
+    left: 15px;
 }
 
-.cell.letter-A { background: #ff9ff3; color: #333; }
-.cell.letter-B { background: #f368e0; color: #333; }
-.cell.letter-C { background: #ff6b9d; color: white; }
-.cell.letter-D { background: #c44569; color: white; }
-.cell.letter-E { background: #f8b500; color: #333; }
-.cell.letter-F { background: #feca57; color: #333; }
-.cell.letter-G { background: #ff9f43; color: #333; }
-.cell.letter-H { background: #ff6348; color: white; }
-.cell.letter-I { background: #ff4757; color: white; }
-.cell.letter-J { background: #c44569; color: white; }
-.cell.letter-K { background: #8854d0; color: white; }
-.cell.letter-L { background: #4834d4; color: white; }
-.cell.letter-M { background: #30336b; color: white; }
-.cell.letter-N { background: #130f40; color: white; }
-.cell.letter-O { background: #6c5ce7; color: white; }
-.cell.letter-P { background: #a29bfe; color: #333; }
-.cell.letter-Q { background: #fd79a8; color: #333; }
-.cell.letter-R { background: #fdcb6e; color: #333; }
-.cell.letter-S { background: #e17055; color: white; }
-.cell.letter-T { background: #d63031; color: white; }
-.cell.letter-U { background: #74b9ff; color: #333; }
-.cell.letter-V { background: #0984e3; color: white; }
-.cell.letter-W { background: #00b894; color: white; }
-.cell.letter-X { background: #00cec9; color: #333; }
-.cell.letter-Y { background: #55a3ff; color: #333; }
-.cell.letter-Z { background: #ffd700; color: #333; font-size: 2.5rem; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+.tile-appear {
+    animation: appear 0.2s ease-in-out;
+}
+
+.tile-merge {
+    animation: merge 0.15s ease-in-out;
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes merge {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.tile.letter-A { background: #ff9ff3; color: #333; }
+.tile.letter-B { background: #f368e0; color: #333; }
+.tile.letter-C { background: #ff6b9d; color: white; }
+.tile.letter-D { background: #c44569; color: white; }
+.tile.letter-E { background: #f8b500; color: #333; }
+.tile.letter-F { background: #feca57; color: #333; }
+.tile.letter-G { background: #ff9f43; color: #333; }
+.tile.letter-H { background: #ff6348; color: white; }
+.tile.letter-I { background: #ff4757; color: white; }
+.tile.letter-J { background: #c44569; color: white; }
+.tile.letter-K { background: #8854d0; color: white; }
+.tile.letter-L { background: #4834d4; color: white; }
+.tile.letter-M { background: #30336b; color: white; }
+.tile.letter-N { background: #130f40; color: white; }
+.tile.letter-O { background: #6c5ce7; color: white; }
+.tile.letter-P { background: #a29bfe; color: #333; }
+.tile.letter-Q { background: #fd79a8; color: #333; }
+.tile.letter-R { background: #fdcb6e; color: #333; }
+.tile.letter-S { background: #e17055; color: white; }
+.tile.letter-T { background: #d63031; color: white; }
+.tile.letter-U { background: #74b9ff; color: #333; }
+.tile.letter-V { background: #0984e3; color: white; }
+.tile.letter-W { background: #00b894; color: white; }
+.tile.letter-X { background: #00cec9; color: #333; }
+.tile.letter-Y { background: #55a3ff; color: #333; }
+.tile.letter-Z { background: #ffd700; color: #333; font-size: 2.5rem; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
 
 .game-over, .game-won {
     position: absolute;
